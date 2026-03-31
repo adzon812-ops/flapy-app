@@ -17,108 +17,174 @@ app.get('/', (c) => {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Flapy - Real Estate Astana</title>
+    <title>Flapy | Real Estate</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #1e293b; }
-        .kaspi-blue { background-color: #0047FF; }
-        .eco-white { background-color: #ffffff; }
-        .nav-shadow { box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
-        .card-blur { backdrop-filter: blur(10px); background: rgba(255, 255, 255, 0.8); }
-        video { border-radius: 12px; object-fit: cover; }
-        .active-tab { color: #0047FF; }
-        .hidden { display: none; }
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap');
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background-color: #F9FAFB; 
+            color: #111827; 
+            -webkit-tap-highlight-color: transparent;
+        }
+        .luxury-card {
+            background: #FFFFFF;
+            border: 1px solid rgba(229, 231, 235, 0.5);
+            box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
+            border-radius: 24px;
+        }
+        .bottom-nav {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        .btn-kaspi {
+            background: #0047FF;
+            transition: all 0.2s ease;
+        }
+        .btn-kaspi:active { transform: scale(0.96); }
+        .tab-active { color: #0047FF; }
+        .tab-inactive { color: #9CA3AF; }
+        
+        /* Анимация появления */
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-feed { animation: fadeIn 0.4s ease forwards; }
     </style>
 </head>
-<body class="pb-24">
+<body class="pb-32">
 
-    <header class="sticky top-0 z-50 eco-white border-b p-4 flex justify-between items-center">
-        <h1 class="text-xl font-semibold tracking-tight">Flapy <span class="text-xs text-blue-500">Astana</span></h1>
-        <div id="admin-trigger" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-xs opacity-0">A</div>
+    <header class="sticky top-0 z-40 bg-[#F9FAFB]/80 backdrop-blur-md px-6 py-4 flex justify-between items-center">
+        <div>
+            <h1 class="text-xl font-bold tracking-tight text-gray-900">Flapy.</h1>
+            <p class="text-[10px] text-blue-500 font-semibold uppercase tracking-widest">Astana Realtors</p>
+        </div>
+        <button class="w-10 h-10 rounded-full bg-white border border-gray-100 flex items-center justify-center shadow-sm">
+            <i data-lucide="search" class="w-5 h-5 text-gray-500"></i>
+        </button>
     </header>
 
-    <main id="app-content" class="p-4 space-y-4">
-        <div id="loader" class="text-center py-20 text-gray-400">Загрузка объектов...</div>
+    <div class="px-6 mb-6 overflow-x-auto flex space-x-3 no-scrollbar">
+        <button class="px-5 py-2 rounded-full bg-gray-900 text-white text-xs font-semibold whitespace-nowrap">Все районы</button>
+        <button class="px-5 py-2 rounded-full bg-white border border-gray-100 text-gray-500 text-xs font-semibold whitespace-nowrap">Есильский</button>
+        <button class="px-5 py-2 rounded-full bg-white border border-gray-100 text-gray-500 text-xs font-semibold whitespace-nowrap">Нура</button>
+    </div>
+
+    <main id="app-content" class="px-6 space-y-6">
+        <div id="loader" class="flex flex-col items-center justify-center py-20 space-y-4">
+            <div class="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+            <p class="text-sm text-gray-400">Поиск лучших предложений...</p>
+        </div>
     </main>
 
-    <nav class="fixed bottom-0 left-0 right-0 eco-white border-t nav-shadow px-6 py-3 flex justify-between items-center z-50">
-        <button onclick="switchTab('listings')" class="flex flex-col items-center space-y-1">
-            <span class="text-xl">🏠</span><span class="text-[10px]">Объекты</span>
+    <nav class="fixed bottom-0 left-0 right-0 h-20 bottom-nav flex justify-around items-center px-4 z-50">
+        <button onclick="switchTab('listings')" class="flex flex-col items-center space-y-1 tab-active">
+            <i data-lucide="home" class="w-6 h-6"></i>
+            <span class="text-[10px] font-medium">Объекты</span>
         </button>
-        <button onclick="switchTab('feed')" class="flex flex-col items-center space-y-1">
-            <span class="text-xl">📱</span><span class="text-[10px]">Лента</span>
+        <button onclick="switchTab('feed')" class="flex flex-col items-center space-y-1 tab-inactive">
+            <i data-lucide="layout-grid" class="w-6 h-6"></i>
+            <span class="text-[10px] font-medium">Лента</span>
         </button>
-        <button onclick="openAddModal()" class="kaspi-blue w-12 h-12 rounded-full flex items-center justify-center text-white shadow-lg -mt-8 border-4 border-white">
-            <span class="text-2xl">+</span>
+        
+        <button onclick="openAddModal()" class="btn-kaspi w-14 h-14 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-blue-200 -mt-10 border-4 border-white">
+            <i data-lucide="plus" class="w-8 h-8"></i>
         </button>
-        <button onclick="switchTab('flai')" class="flex flex-col items-center space-y-1">
-            <span class="text-xl">🤖</span><span class="text-[10px]">Flai AI</span>
+
+        <button onclick="switchTab('flai')" class="flex flex-col items-center space-y-1 tab-inactive">
+            <i data-lucide="sparkles" class="w-6 h-6"></i>
+            <span class="text-[10px] font-medium">Flai AI</span>
         </button>
-        <button onclick="switchTab('more')" class="flex flex-col items-center space-y-1">
-            <span class="text-xl">☰</span><span class="text-[10px]">Ещё</span>
+        <button onclick="switchTab('more')" class="flex flex-col items-center space-y-1 tab-inactive">
+            <i data-lucide="user" class="w-6 h-6"></i>
+            <span class="text-[10px] font-medium">Профиль</span>
         </button>
     </nav>
 
-    <div id="add-modal" class="fixed inset-0 bg-black/60 z-[60] hidden flex items-end">
-        <div class="eco-white w-full rounded-t-3xl p-6 space-y-4 animate-slide-up">
+    <div id="add-modal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-[60] hidden flex items-end">
+        <div class="bg-white w-full rounded-t-[32px] p-8 space-y-6 animate-slide-up shadow-2xl">
             <div class="flex justify-between items-center">
-                <h2 class="text-lg font-semibold">Добавить объект</h2>
-                <button onclick="closeAddModal()" class="text-gray-400 text-2xl">&times;</button>
+                <h2 class="text-xl font-bold">Новый объект</h2>
+                <button onclick="closeAddModal()" class="w-8 h-8 flex items-center justify-center bg-gray-100 rounded-full text-gray-500">&times;</button>
             </div>
-            <input type="text" id="price" placeholder="Цена (тг)" class="w-full p-3 bg-gray-50 rounded-xl border-none">
-            <select id="district" class="w-full p-3 bg-gray-50 rounded-xl border-none">
-                <option value="Есильский">Есильский район</option>
-                <option value="Алматы">Район Алматы</option>
-                <option value="Сарыарка">Район Сарыарка</option>
-                <option value="Байконур">Район Байконур</option>
-                <option value="Нура">Район Нура</option>
-            </select>
-            <div class="border-2 border-dashed border-gray-200 rounded-xl p-8 text-center relative">
-                <input type="file" id="video-input" accept="video/*" class="absolute inset-0 opacity-0 cursor-pointer">
-                <span id="upload-status" class="text-sm text-gray-500">Нажмите, чтобы загрузить видео</span>
+            <div class="space-y-4">
+                <input type="number" id="price" placeholder="Цена в тенге" class="w-full p-4 bg-gray-50 rounded-2xl border-none focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+                <select id="district" class="w-full p-4 bg-gray-50 rounded-2xl border-none focus:ring-2 focus:ring-blue-500 outline-none">
+                    <option value="Есильский">Есильский район</option>
+                    <option value="Нура">Район Нура</option>
+                    <option value="Алматы">Район Алматы</option>
+                    <option value="Сарыарка">Район Сарыарка</option>
+                </select>
+                <label class="flex flex-col items-center justify-center border-2 border-dashed border-gray-200 rounded-2xl p-10 hover:bg-gray-50 cursor-pointer transition-all">
+                    <i data-lucide="video" class="w-10 h-10 text-gray-300 mb-2"></i>
+                    <span id="upload-status" class="text-xs text-gray-400 font-medium text-center">Загрузите видеообзор квартиры</span>
+                    <input type="file" id="video-input" accept="video/*" class="hidden">
+                </label>
             </div>
-            <button id="save-btn" onclick="saveListing()" class="w-full kaspi-blue text-white py-4 rounded-xl font-semibold">Опубликовать</button>
+            <button id="save-btn" onclick="saveListing()" class="w-full btn-kaspi text-white py-4 rounded-2xl font-bold shadow-lg shadow-blue-100">Опубликовать</button>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        const supabase = supabase.createClient('${SUPABASE_URL}', '${SUPABASE_ANON_KEY}');
-        let currentTab = 'listings';
-
+        const supabaseClient = supabase.createClient('${SUPABASE_URL}', '${SUPABASE_ANON_KEY}');
+        
         async function fetchListings() {
-            const { data, error } = await supabase.from('listings').select('*').order('created_at', { ascending: false });
+            const { data, error } = await supabaseClient.from('listings').select('*').order('created_at', { ascending: false });
             if (error) return console.error(error);
             render(data);
+            lucide.createIcons(); // Обновляем иконки после рендера
         }
 
         function render(items) {
             const container = document.getElementById('app-content');
-            if (items.length === 0) {
-                container.innerHTML = '<div class="text-center py-20 text-gray-400">Пока нет объектов</div>';
+            if (!items || items.length === 0) {
+                container.innerHTML = \`
+                    <div class="flex flex-col items-center justify-center py-20 text-center">
+                        <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                             <i data-lucide="ghost" class="w-10 h-10 text-gray-300"></i>
+                        </div>
+                        <h3 class="text-gray-900 font-bold">Пока пусто</h3>
+                        <p class="text-xs text-gray-400 mt-1 px-10">Будьте первым, кто добавит объект в базу Flapy</p>
+                    </div>
+                \`;
+                lucide.createIcons();
                 return;
             }
             container.innerHTML = items.map(item => \`
-                <div class="eco-white rounded-2xl overflow-hidden shadow-sm border border-gray-100">
-                    \${item.video_url ? \`<video src="\${item.video_url}" class="w-full h-64" loop muted playsinline onclick="this.paused ? this.play() : this.pause()"></video>\` : '<div class="h-64 bg-gray-100 flex items-center justify-center">Нет видео</div>'}
-                    <div class="p-4">
-                        <div class="flex justify-between items-start mb-2">
-                            <h3 class="text-lg font-bold">\${Number(item.price).toLocaleString()} ₸</h3>
-                            <span class="bg-blue-50 text-blue-600 text-[10px] px-2 py-1 rounded-full uppercase font-bold">\${item.district}</span>
+                <div class="luxury-card overflow-hidden animate-feed">
+                    <div class="relative h-72">
+                        <video src="\${item.video_url}" class="w-full h-full object-cover" loop muted playsinline onclick="this.paused ? this.play() : this.pause()"></video>
+                        <div class="absolute top-4 left-4">
+                            <span class="bg-white/90 backdrop-blur px-3 py-1 rounded-full text-[10px] font-bold text-gray-900 shadow-sm uppercase tracking-wider">\${item.district}</span>
                         </div>
-                        <p class="text-sm text-gray-500 mb-4">\${item.type || 'Квартира'} • Астана</p>
-                        <div class="grid grid-cols-2 gap-3">
-                            <a href="tel:\${item.phone}" class="flex items-center justify-center space-x-2 bg-gray-900 text-white py-3 rounded-xl text-sm">
-                                <span>📞 Позвонить</span>
+                    </div>
+                    <div class="p-5">
+                        <div class="flex justify-between items-end mb-4">
+                            <div>
+                                <p class="text-[10px] text-gray-400 font-bold uppercase mb-1">Стоимость</p>
+                                <h3 class="text-xl font-bold text-gray-900">\${Number(item.price).toLocaleString()} ₸</h3>
+                            </div>
+                            <div class="flex -space-x-2">
+                                <div class="w-8 h-8 rounded-full border-2 border-white bg-gray-200"></div>
+                                <div class="w-8 h-8 rounded-full border-2 border-white bg-gray-300 flex items-center justify-center text-[8px] font-bold">R</div>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3 pt-4 border-t border-gray-50">
+                            <a href="tel:\${item.phone}" class="flex items-center justify-center space-x-2 bg-gray-900 text-white py-3.5 rounded-xl text-[12px] font-bold active:scale-95 transition-all">
+                                <i data-lucide="phone" class="w-4 h-4"></i>
+                                <span>Позвонить</span>
                             </a>
-                            <a href="https://wa.me/77000000000" class="flex items-center justify-center space-x-2 border border-gray-200 py-3 rounded-xl text-sm">
-                                <span>💬 Написать</span>
+                            <a href="https://wa.me/\${item.phone}" class="flex items-center justify-center space-x-2 bg-white border border-gray-100 py-3.5 rounded-xl text-[12px] font-bold active:scale-95 transition-all">
+                                <i data-lucide="message-circle" class="w-4 h-4 text-green-500"></i>
+                                <span>WhatsApp</span>
                             </a>
                         </div>
                     </div>
                 </div>
             \`).join('');
+            lucide.createIcons();
         }
 
         async function saveListing() {
@@ -127,53 +193,41 @@ app.get('/', (c) => {
             const price = document.getElementById('price').value;
             const district = document.getElementById('district').value;
 
-            if (!price || !file) return alert('Сэр, введите цену и выберите видео!');
+            if (!price || !file) return alert('Сэр, заполните цену и загрузите видео!');
             
-            btn.innerText = 'Загрузка...';
+            btn.innerText = 'Публикация...';
             btn.disabled = true;
 
-            // 1. Загрузка видео в Supabase Storage
-            const fileName = \`\${Date.now()}_video.mp4\`;
-            const { data: uploadData, error: uploadError } = await supabase.storage
-                .from('flapy-media')
-                .upload(fileName, file);
+            const fileName = \`\${Date.now()}_v.mp4\`;
+            const { data: up, error: upE } = await supabaseClient.storage.from('flapy-media').upload(fileName, file);
 
-            if (uploadError) return alert('Ошибка загрузки видео');
+            if (upE) return alert('Ошибка загрузки');
 
-            const videoUrl = supabase.storage.from('flapy-media').getPublicUrl(fileName).data.publicUrl;
+            const videoUrl = supabaseClient.storage.from('flapy-media').getPublicUrl(fileName).data.publicUrl;
 
-            // 2. Сохранение данных в таблицу
-            const { error: dbError } = await supabase.from('listings').insert([
-                { price: price, district: district, video_url: videoUrl, phone: '77015554433' }
-            ]);
+            await supabaseClient.from('listings').insert([{ price, district, video_url: videoUrl, phone: '77001234567' }]);
 
-            if (dbError) alert('Ошибка сохранения данных');
-            else {
-                closeAddModal();
-                fetchListings();
-            }
+            closeAddModal();
+            fetchListings();
             btn.innerText = 'Опубликовать';
             btn.disabled = false;
         }
 
         function switchTab(tab) {
-            currentTab = tab;
+            document.querySelectorAll('nav button').forEach(b => {
+                b.classList.remove('tab-active');
+                b.classList.add('tab-inactive');
+            });
+            event.currentTarget.classList.add('tab-active');
+            event.currentTarget.classList.remove('tab-inactive');
             if (tab === 'listings') fetchListings();
-            else document.getElementById('app-content').innerHTML = '<div class="text-center py-20 text-gray-400 italic">Сэр, раздел ' + tab + ' находится в разработке</div>';
+            else document.getElementById('app-content').innerHTML = '<div class="text-center py-20 text-gray-400 italic text-sm">Раздел в разработке...</div>';
         }
 
         function openAddModal() { document.getElementById('add-modal').classList.remove('hidden'); }
         function closeAddModal() { document.getElementById('add-modal').classList.add('hidden'); }
 
-        // Секретный вход для Админа (Долгое нажатие на логотип)
-        let timer;
-        const logo = document.querySelector('header h1');
-        logo.addEventListener('mousedown', () => timer = setTimeout(() => {
-            const pass = prompt('Пароль Сэр:');
-            if(pass === '2026') alert('Добро пожаловать в пульт управления!');
-        }, 3000));
-        logo.addEventListener('mouseup', () => clearTimeout(timer));
-
+        lucide.createIcons();
         fetchListings();
     </script>
 </body>
